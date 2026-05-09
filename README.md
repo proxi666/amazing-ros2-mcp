@@ -184,6 +184,13 @@ Amazing ROS 2 MCP is intended for native ROS 2 workflows where an AI agent needs
 
 Rosbridge-based servers remain useful for browser-oriented or remote WebSocket workflows. This server is focused on native ROS 2 development and robot-agent control.
 
+## Credits
+
+This project synthesizes patterns and inspiration from several excellent community projects:
+- **[robotmcp/ros-mcp-server](https://github.com/robotmcp/ros-mcp-server)** — Inspiration for tool categorization, FastMCP annotations, and image workflow design.
+- **[kakimochi/ros2-mcp-server](https://github.com/kakimochi/ros2-mcp-server)** — Pioneers of the background spin-thread pattern for native `rclpy` integration.
+- **[ajtudela/nav2_mcp_server](https://github.com/ajtudela/nav2_mcp_server)** — Excellent reference for Nav2 integration via `anyio.to_thread`.
+
 ## Contributing
 
 Contributions are welcome. New tool groups should be small, focused, and registered from `src/amazing_ros2_mcp/tools/__init__.py`.
