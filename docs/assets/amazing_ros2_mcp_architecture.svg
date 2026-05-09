@@ -1,0 +1,154 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Amazing ROS 2 MCP architecture</title>
+  <desc id="desc">Layered architecture diagram showing an AI agent using MCP transports to call FastMCP tools, which bridge into a native rclpy node, safety layer, ROS 2 graph, and robot or simulator.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0f172a" flood-opacity="0.13"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0L10 5L0 10Z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-soft" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0 0L9 4.5L0 9Z" fill="#64748b"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .panel { fill: #ffffff; stroke: #dbe4ee; stroke-width: 1.4; filter: url(#shadow); }
+      .panel-soft { fill: #f1f5f9; stroke: #dbe4ee; stroke-width: 1.2; }
+      .client { fill: #e0f2fe; stroke: #0284c7; stroke-width: 1.5; }
+      .server { fill: #ede9fe; stroke: #7c3aed; stroke-width: 1.5; }
+      .tool { fill: #ecfdf5; stroke: #059669; stroke-width: 1.25; }
+      .runtime { fill: #fff7ed; stroke: #ea580c; stroke-width: 1.25; }
+      .safety { fill: #fee2e2; stroke: #dc2626; stroke-width: 1.3; }
+      .graph { fill: #eef2ff; stroke: #4f46e5; stroke-width: 1.4; }
+      text { font-family: Inter, Segoe UI, Arial, sans-serif; }
+      .title { font-size: 30px; font-weight: 700; fill: #0f172a; }
+      .section { font-size: 15px; font-weight: 700; fill: #334155; letter-spacing: .02em; }
+      .label { font-size: 17px; font-weight: 700; fill: #0f172a; }
+      .small { font-size: 13px; font-weight: 500; fill: #475569; }
+      .tiny { font-size: 11px; font-weight: 600; fill: #64748b; letter-spacing: .04em; }
+      .connector { stroke: #94a3b8; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+      .arrow { stroke: #475569; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+      .arrow-soft { stroke: #64748b; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+      .head { fill: #475569; }
+      .head-soft { fill: #64748b; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1200" height="760" rx="28"/>
+  <text x="60" y="60" class="title">Amazing ROS 2 MCP Server</text>
+  <text x="60" y="88" class="small">Native MCP bridge for AI agents, ROS 2 graph introspection, robot actions, image capture, Nav2, and safety guarded writes.</text>
+
+  <rect x="60" y="120" width="1080" height="560" rx="24" class="panel"/>
+
+  <text x="100" y="168" class="section">CLIENT LAYER</text>
+  <rect x="92" y="190" width="220" height="95" rx="18" class="client"/>
+  <text x="122" y="226" class="label">LLM / Agent</text>
+  <text x="122" y="250" class="small">Codex, Claude, custom agent</text>
+  <text x="122" y="270" class="small">Structured tool calls</text>
+
+  <rect x="92" y="330" width="220" height="95" rx="18" class="client"/>
+  <text x="122" y="366" class="label">MCP Transport</text>
+  <text x="122" y="390" class="small">stdio, HTTP</text>
+  <text x="122" y="410" class="small">JSON-RPC boundary</text>
+
+  <path d="M202 286V314" class="arrow"/>
+  <path d="M202 326L194 310H210Z" class="head"/>
+
+  <text x="390" y="168" class="section">MCP SERVER</text>
+  <rect x="360" y="190" width="260" height="95" rx="18" class="server"/>
+  <text x="392" y="226" class="label">FastMCP Server</text>
+  <text x="392" y="250" class="small">Tool registry and schemas</text>
+  <text x="392" y="270" class="small">Routes each request</text>
+
+  <rect x="360" y="330" width="260" height="95" rx="18" class="server"/>
+  <text x="392" y="366" class="label">Async Bridge</text>
+  <text x="392" y="390" class="small">anyio.to_thread</text>
+  <text x="392" y="410" class="small">Keeps MCP loop responsive</text>
+
+  <path d="M312 238H338" class="arrow"/>
+  <path d="M350 238L334 230V246Z" class="head"/>
+  <path d="M490 286V314" class="arrow"/>
+  <path d="M490 326L482 310H498Z" class="head"/>
+
+  <text x="685" y="168" class="section">TOOL LAYER</text>
+  <rect x="660" y="190" width="138" height="64" rx="14" class="tool"/>
+  <text x="688" y="218" class="label">Topics</text>
+  <text x="686" y="238" class="small">echo, publish</text>
+  <rect x="818" y="190" width="138" height="64" rx="14" class="tool"/>
+  <text x="844" y="218" class="label">Services</text>
+  <text x="844" y="238" class="small">inspect, call</text>
+  <rect x="976" y="190" width="114" height="64" rx="14" class="tool"/>
+  <text x="1002" y="218" class="label">Actions</text>
+  <text x="1000" y="238" class="small">send goal</text>
+
+  <rect x="660" y="276" width="138" height="64" rx="14" class="tool"/>
+  <text x="698" y="304" class="label">Nodes</text>
+  <text x="686" y="324" class="small">graph info</text>
+  <rect x="818" y="276" width="138" height="64" rx="14" class="tool"/>
+  <text x="846" y="304" class="label">Params</text>
+  <text x="850" y="324" class="small">read/list</text>
+  <rect x="976" y="276" width="114" height="64" rx="14" class="tool"/>
+  <text x="1003" y="304" class="label">Image</text>
+  <text x="997" y="324" class="small">base64 JPEG</text>
+
+  <rect x="660" y="362" width="430" height="64" rx="14" class="tool"/>
+  <text x="690" y="390" class="label">Nav2 Tools</text>
+  <text x="690" y="410" class="small">navigate, follow waypoints, spin, cancel, clear costmaps</text>
+
+  <path d="M620 238H640" class="arrow"/>
+  <path d="M652 238L636 230V246Z" class="head"/>
+  <path d="M620 378H640" class="arrow"/>
+  <path d="M652 378L636 370V386Z" class="head"/>
+
+  <text x="100" y="470" class="section">NATIVE ROS 2 RUNTIME</text>
+  <rect x="92" y="508" width="232" height="92" rx="18" class="runtime"/>
+  <text x="122" y="542" class="label">Managed rclpy Node</text>
+  <text x="122" y="566" class="small">Background spin thread</text>
+  <text x="122" y="586" class="small">Native ROS 2 APIs</text>
+
+  <rect x="350" y="508" width="202" height="92" rx="18" class="runtime"/>
+  <text x="380" y="542" class="label">Msg Converter</text>
+  <text x="380" y="566" class="small">ROS message</text>
+  <text x="380" y="586" class="small">to JSON-safe dict</text>
+
+  <rect x="578" y="508" width="232" height="92" rx="18" class="runtime"/>
+  <text x="608" y="542" class="label">Workspace Importer</text>
+  <text x="608" y="566" class="small">AMENT_PREFIX_PATH</text>
+  <text x="608" y="586" class="small">nearby install/ discovery</text>
+
+  <rect x="836" y="508" width="254" height="92" rx="18" class="safety"/>
+  <text x="866" y="542" class="label">Safety Guardrails</text>
+  <text x="866" y="566" class="small">Clamp cmd_vel, block topics</text>
+  <text x="866" y="586" class="small">dry-run before publish</text>
+
+  <path d="M490 426V488" class="connector"/>
+  <path d="M208 488H963" class="connector"/>
+  <path d="M208 488V494" class="arrow-soft"/>
+  <path d="M208 504L202 492H214Z" class="head-soft"/>
+  <path d="M451 488V494" class="arrow-soft"/>
+  <path d="M451 504L445 492H457Z" class="head-soft"/>
+  <path d="M694 488V494" class="arrow-soft"/>
+  <path d="M694 504L688 492H700Z" class="head-soft"/>
+  <path d="M963 488V494" class="arrow-soft"/>
+  <path d="M963 504L957 492H969Z" class="head-soft"/>
+
+  <text x="100" y="630" class="section">ROS 2 GRAPH + ROBOT</text>
+  <rect x="92" y="652" width="474" height="58" rx="16" class="graph"/>
+  <text x="122" y="686" class="label">ROS 2 Graph</text>
+  <text x="250" y="686" class="small">topics, services, actions, params, custom interfaces</text>
+
+  <rect x="616" y="652" width="474" height="58" rx="16" class="graph"/>
+  <text x="646" y="686" class="label">Robot / Simulator</text>
+  <text x="810" y="686" class="small">Gazebo, Nav2, sensors, hardware</text>
+
+  <path d="M208 601V612H329V638" class="arrow"/>
+  <path d="M329 650L321 634H337Z" class="head"/>
+  <path d="M566 681H602" class="arrow"/>
+  <path d="M614 681L598 673V689Z" class="head"/>
+  <path d="M963 601V632H854V638" class="arrow-soft"/>
+  <path d="M854 650L848 638H860Z" class="head-soft"/>
+
+  <rect x="60" y="704" width="1080" height="1" fill="#e2e8f0"/>
+  <text x="60" y="735" class="tiny">DESIGN RULE: THE AGENT TALKS TO MCP TOOLS; MCP TALKS TO ROS 2 NATIVELY; SAFETY FILTERS WRITE OPERATIONS BEFORE THE ROBOT SEES THEM.</text>
+</svg>
