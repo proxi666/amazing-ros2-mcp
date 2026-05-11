@@ -96,6 +96,10 @@ def register_image_tools(mcp: FastMCP) -> None:
 
 def _raw_to_jpeg(msg) -> Optional[bytes]:
     """Convert a sensor_msgs/Image to JPEG bytes."""
+    pil_bytes = _raw_to_jpeg_pil(msg)
+    if pil_bytes is not None:
+        return pil_bytes
+
     try:
         import numpy as np
         import cv2
@@ -131,3 +135,53 @@ def _raw_to_jpeg(msg) -> Optional[bytes]:
 
     success, jpeg = cv2.imencode(".jpg", arr, [cv2.IMWRITE_JPEG_QUALITY, 85])
     return jpeg.tobytes() if success else None
+
+
+def _raw_to_jpeg_pil(msg) -> Optional[bytes]:
+    """Convert common raw Image encodings to JPEG using Pillow."""
+    try:
+        from io import BytesIO
+        from PIL import Image
+    except ImportError:
+        return None
+
+    encoding = msg.encoding.lower()
+    width, height = msg.width, msg.height
+    channels_by_encoding = {
+        "rgb8": 3,
+        "bgr8": 3,
+        "rgba8": 4,
+        "bgra8": 4,
+        "mono8": 1,
+    }
+    channels = channels_by_encoding.get(encoding)
+    if channels is None:
+        return None
+
+    row_bytes = width * channels
+    data = bytes(msg.data)
+    if getattr(msg, "step", row_bytes) != row_bytes:
+        step = msg.step
+        data = b"".join(
+            data[row * step: row * step + row_bytes]
+            for row in range(height)
+        )
+
+    if encoding == "rgb8":
+        image = Image.frombytes("RGB", (width, height), data)
+    elif encoding == "bgr8":
+        image = Image.frombytes("RGB", (width, height), data, "raw", "BGR")
+    elif encoding == "rgba8":
+        image = Image.frombytes("RGBA", (width, height), data).convert("RGB")
+    elif encoding == "bgra8":
+        image = Image.frombytes(
+            "RGBA", (width, height), data, "raw", "BGRA"
+        ).convert("RGB")
+    elif encoding == "mono8":
+        image = Image.frombytes("L", (width, height), data).convert("RGB")
+    else:
+        return None
+
+    output = BytesIO()
+    image.save(output, format="JPEG", quality=85)
+    return output.getvalue()
